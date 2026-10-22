@@ -199,54 +199,112 @@ st.set_page_config(
 # -----------------------------
 # EDITORIAL DESIGN
 # -----------------------------
+
 st.markdown(
     """
     <style>
+    /* Main page */
     .block-container {
         max-width: 1250px;
-        padding-top: 2rem;
+        padding-top: 4rem;
         padding-bottom: 3rem;
+        color: #172B4D;
+        font-family: -apple-system, BlinkMacSystemFont, "Segoe UI",
+                     sans-serif;
     }
 
-    .eyebrow {
-        text-transform: uppercase;
-        letter-spacing: 0.13em;
-        font-size: 0.75rem;
-        font-weight: 700;
-        color: #23836B;
-    }
+    /* Small section labels */
+    
+.eyebrow {
+    display: inline-block;
+    width: fit-content;
+    max-width: 100%;
+    box-sizing: border-box;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    font-size: 0.75rem;
+    font-weight: 800;
+    line-height: 1.5;
+    color: #163653;
+    background-color: #B9E3FA;
+    padding: 0.4rem 0.7rem;
+    border-radius: 6px;
+    margin-top: 1rem;
+    margin-bottom: 0.75rem;
+    white-space: normal;
+    overflow-wrap: anywhere;
+}
 
+
+    /* Introductory copy */
     .intro {
         font-size: 1.05rem;
-        line-height: 1.7;
+        line-height: 1.8;
         max-width: 720px;
+        color: #536174;
     }
 
+    /* Text input areas */
     div[data-testid="stTextArea"] textarea {
         min-height: 240px;
         border-radius: 10px;
+        border: 1px solid #D9DDE3;
+        font-size: 1rem;
+        line-height: 1.7;
     }
 
+    div[data-testid="stTextArea"] textarea:focus {
+        border-color: #286B59;
+        box-shadow: 0 0 0 1px #286B59;
+    }
+
+    /* Buttons */
     div.stButton > button,
     div.stDownloadButton > button {
-        min-height: 42px;
+        min-height: 44px;
         border-radius: 8px;
         font-weight: 600;
+        transition: all 0.2s ease;
     }
 
+    div.stButton > button[kind="primary"] {
+        background-color: #172B4D;
+        border: 1px solid #172B4D;
+        color: #FFFFFF;
+    }
+
+    div.stButton > button[kind="primary"]:hover {
+        background-color: #263F66;
+        border-color: #263F66;
+    }
+
+    /* Headings */
+    h1, h2, h3 {
+        color: #172B4D;
+        letter-spacing: -0.025em;
+        line-height: 1.25;
+    }
+
+    /* Mobile layout */
     @media (max-width: 700px) {
         .block-container {
-            padding: 1rem 1rem 2rem;
+            padding: 4rem 1rem 2rem;
         }
 
         div[data-testid="stTextArea"] textarea {
             min-height: 180px;
         }
+
+        .intro {
+            font-size: 1rem;
+        }
     }
+
     </style>
     """,
     unsafe_allow_html=True,
 )
+
 
 # -----------------------------
 # SESSION STATE
