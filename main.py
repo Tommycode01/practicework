@@ -356,151 +356,153 @@ st.markdown(
 
 st.divider()
 
+
 # -----------------------------
-# SPLIT-SCREEN WORKSPACE
+# SESSION 01: UNDERSTAND THE CLAIM
 # -----------------------------
-input_col, result_col = st.columns([1, 1], gap="large")
+with st.container(border=True):
+    st.subheader("01 · Understand the claim")
 
-with input_col:
-    with st.container(border=True):
-        st.subheader("01 · Examine a message")
+    st.write(
+        "Paste a viral message, rumour or headline below."
+    )
 
-        st.write(
-            "Paste a viral message, rumour or headline below."
+    user_text = st.text_area(
+        "Message to examine",
+        max_chars=5000,
+        height=240,
+        placeholder="Paste the message you want to examine...",
+        label_visibility="collapsed",
+        key="message_input",
+    )
+
+    st.caption(f"{len(user_text)} / 5,000 characters")
+
+    analyse_col, reset_col = st.columns([2, 1])
+
+    with analyse_col:
+        analyse_clicked = st.button(
+            "Analyse message →",
+            type="primary",
+            use_container_width=True,
         )
 
-        user_text = st.text_area(
-            "Message to examine",
-            max_chars=5000,
-            height=240,
-            placeholder="Paste the message you want to examine...",
-            label_visibility="collapsed",
-            key="message_input",
+    with reset_col:
+        st.button(
+            "Reset",
+            on_click=reset_workspace,
+            use_container_width=True,
         )
 
-        st.caption(f"{len(user_text)} / 5,000 characters")
+    st.caption(
+        "ContextCheck examines claims; it does not automatically "
+        "establish whether they are true or false."
+    )
 
-        analyse_col, reset_col = st.columns([2, 1])
-
-        with analyse_col:
-            analyse_clicked = st.button(
-                "Analyse message →",
-                type="primary",
-                use_container_width=True,
-            )
-
-        with reset_col:
-            st.button(
-                "Reset",
-                on_click=reset_workspace,
-                use_container_width=True,
-            )
-
-        st.caption(
-            "ContextCheck examines claims; it does not automatically "
-            "establish whether they are true or false."
+if analyse_clicked:
+    if not validate_text(user_text):
+        st.error(
+            "Please enter a valid message of up to 5,000 characters."
         )
+    else:
+        with st.spinner("Examining the claim..."):
+            analysis = analyse_claim(user_text)
 
-    # Run the existing validation and analysis functions.
-    if analyse_clicked:
-        if not validate_text(user_text):
-            st.error(
-                "Please enter a valid message of up to 5,000 characters."
-            )
+        if isinstance(analysis, dict):
+            st.session_state.analysis_result = analysis
+            st.session_state.analysis_failed = False
+            st.session_state.evidence_result = None
         else:
-            with st.spinner("Examining the claim..."):
-                analysis = analyse_claim(user_text)
-
-            if isinstance(analysis, dict):
-                st.session_state.analysis_result = analysis
-                st.session_state.analysis_failed = False
-            else:
-                st.session_state.analysis_result = None
-                st.session_state.analysis_failed = True
-
-with result_col:
-    with st.container(border=True):
-        st.subheader("02 · Your analysis")
-
-        st.caption(
-            "Use the results as a starting point for independent checking."
-        )
-
-        result = st.session_state.analysis_result
-
-        if isinstance(result, dict):
-            st.success("Analysis ready")
-
-            st.markdown("#### Main claim")
-            st.write(
-                result.get(
-                    "main_claim",
-                    "No main claim returned.",
-                )
-            )
-
-            st.divider()
-
-            st.markdown("#### Missing evidence")
-            st.write(
-                result.get(
-                    "missing_evidence",
-                    "No missing-evidence details returned.",
-                )
-            )
-
-            st.divider()
-
-            st.markdown("#### Verification steps")
-            steps = result.get("verification_steps", [])
-
-            if isinstance(steps, list) and steps:
-                st.caption(
-                    "Tick each step as you complete it. "
-                    "The checkboxes track your progress only."
-                )
-
-                for i, step in enumerate(steps):
-                    st.checkbox(
-                        str(step),
-                        key=f"verification_step_{i}",
-                    )
-            else:
-                st.info("No verification steps were returned.")
-
-            st.divider()
-
-            st.download_button(
-                "Download analysis as JSON",
-                data=json.dumps(
-                    result,
-                    indent=2,
-                    ensure_ascii=False,
-                ),
-                file_name="contextcheck_analysis.json",
-                mime="application/json",
-                use_container_width=True,
-            )
-
-        elif st.session_state.analysis_failed:
-            st.error(
-                "ContextCheck couldn't produce a usable analysis. "
-                "Please try again. The AI service may be temporarily "
-                "unavailable, or its response may not have been usable."
-            )
-
-        else:
-            st.info(
-                "Your analysis will appear here after you submit a message."
-            )
+            st.session_state.analysis_result = None
+            st.session_state.analysis_failed = True
+            st.session_state.evidence_result = None
 
 
 st.divider()
 
+
+# -----------------------------
+# SESSION 02: YOUR ANALYSIS
+# -----------------------------
+with st.container(border=True):
+    st.subheader("02 · Your analysis")
+
+    st.caption(
+        "Use the results as a starting point for independent checking."
+    )
+
+    result = st.session_state.analysis_result
+
+    if isinstance(result, dict):
+        st.success("Analysis ready")
+
+        st.markdown("#### Main claim")
+        st.write(
+            result.get(
+                "main_claim",
+                "No main claim returned.",
+            )
+        )
+
+        st.divider()
+
+        st.markdown("#### Missing evidence")
+        st.write(
+            result.get(
+                "missing_evidence",
+                "No missing-evidence details returned.",
+            )
+        )
+
+        st.divider()
+
+        st.markdown("#### Verification steps")
+        steps = result.get("verification_steps", [])
+
+        if isinstance(steps, list) and steps:
+            st.caption(
+                "Tick each step as you complete it. "
+                "The checkboxes track your progress only."
+            )
+
+            for i, step in enumerate(steps):
+                st.checkbox(
+                    str(step),
+                    key=f"verification_step_{i}",
+                )
+        else:
+            st.info("No verification steps were returned.")
+
+        st.divider()
+
+        st.download_button(
+            "Download analysis as JSON",
+            data=json.dumps(
+                result,
+                indent=2,
+                ensure_ascii=False,
+            ),
+            file_name="contextcheck_analysis.json",
+            mime="application/json",
+            use_container_width=True,
+        )
+
+    elif st.session_state.analysis_failed:
+        st.error(
+            "ContextCheck couldn't produce a usable analysis. "
+            "Please try again. The AI service may be temporarily "
+            "unavailable, or its response may not have been usable."
+        )
+
+    else:
+        st.info(
+            "Your analysis will appear here after you submit a message."
+        )
+
 # -----------------------------
 # EVIDENCE WORKSPACE
 # -----------------------------
-st.subheader("03 · Evidence workspace")
+st.subheader("03 · Examine the source")
 
 st.write(
     "Record the sources you examine and what you learn from them. "
@@ -518,6 +520,21 @@ with st.container(border=True):
         help="Paste the link to the page or document you examined.",
     )
 
+
+    st.text_area(
+        "Evidence notes",
+        placeholder=(
+            "What does this source say? Does it support, contradict, "
+            "or leave the claim unresolved? Record relevant details."
+        ),
+        height=140,
+        key="evidence_notes",
+    )
+
+    st.caption(
+        "Prefer original documents and official announcements "
+        "where appropriate. Record what you actually found."
+    )
 
 if st.button("Examine source", type="primary"):
     if not st.session_state.get("analysis_result"):
@@ -576,24 +593,6 @@ if evidence_result:
     for step in evidence_result["next_steps"]:
         st.markdown(f"- {step}")
 
-
-    if "evidence_result" not in st.session_state:
-                st.session_state.evidence_result = None
-
-    st.text_area(
-        "Evidence notes",
-        placeholder=(
-            "What does this source say? Does it support, contradict, "
-            "or leave the claim unresolved? Record relevant details."
-        ),
-        height=140,
-        key="evidence_notes",
-    )
-
-    st.caption(
-        "Tip: Prefer original documents and official announcements "
-        "where appropriate. Record what you actually found."
-    )
 
 st.divider()
 
